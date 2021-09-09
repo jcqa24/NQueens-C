@@ -22,7 +22,7 @@ int * InitConf(int N){
 		pos = rand() % (N); // pos en el arreglo
 		if((conf[pos] == -1) && (conf[pos] != i)){
 			conf[pos] = i;
-			i++;
+			i++;	
 		}
 	}
 
@@ -35,9 +35,9 @@ void printConf(int * conf, int N){
 	for(int i =0; i<N;i++){
 		for(int j = 0; j<N;j++){
 			if(conf[i] == j){
-				printf("%c",'X');
+				printf(" %c ",'X');
 			}else{
-				printf("%c",'-');
+				printf(" %c ",'-');
 			}
 		}
 		printf("\n");
@@ -46,9 +46,29 @@ void printConf(int * conf, int N){
 }
 
 int  calFit(int * conf, int N){
+	int errores = 0;
+	int pos;
+	for(int i =0;i<N;i++){
+		pos = i+conf[i];
+		for(int j = 0; j<N; j++){
+			if((i != j) && (pos == (j+conf[j]))){
+				errores++;	
+				break;
+			}
+		}
+	}
 	
+	for(int i =N-1;i>=0;i--){
+		pos = i-conf[i];
+		for(int j = N-1; j>=0; j--){
+			if((i != j) && (pos == (j-conf[j]))){
+				errores++;	
+				break;
+			}
+		}
+	}
 	
-	return 0;
+	return errores;
 }
 
 
@@ -77,5 +97,6 @@ int main(){
 	
 
 	printConf(population[0].config,N);
+	printf("Errores ->> %d", calFit(population[0].config,N));
 	return 0;
 }
