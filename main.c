@@ -4,73 +4,30 @@
 #include <string.h>
 struct gen{
 	int fitness;
-	int * config; 
+	int * config;
 };typedef struct gen Gen;
 
 
 int size;
 
-//merge_sort
-void intercambia(int ini, int mid, int fin,Gen *Aaux){
-        int i, j, k;
-	Gen *temp = (Gen *) malloc(sizeof(Gen)*size);
 
-        i = ini;
-        k = ini;
-        j = mid + 1;
-        while ((i <= mid) && (j <= fin))
-        {
-                if (Aaux[i].fitness <= Aaux[j].fitness)
-                {
-                        temp[k].fitness = Aaux[i].fitness;
-                        temp[k].config = Aaux[i].config;
-                        i++;
-                }
-                else
-                {
-                        temp[k].fitness = Aaux[i].fitness;
-                        
-                        temp[k].config = Aaux[i].config;
-                        j++;
-                }
-                k++;
-        }
-        if (i > mid)
-        {
-                for (int h = j; h <= fin; h++)
-                {
-                       
-                        temp[k].fitness = Aaux[i].fitness;
-                        temp[k].config = Aaux[i].config;
-                        k++;
-                }
-        }
-        else
-        {
-                for (int h = i; h <= mid; h++)
-                {
-                        temp[k].fitness = Aaux[i].fitness;
-                        temp[k].config = Aaux[i].config;
-                        k++;
-                }
-        }
+void ordena(Gen * lista,int TAM){
+Gen temp;
+int i,j;	
+for (i=1;i<TAM;i++)
+{
+	for (j=0;j<TAM-1;j++)
+	{
+		if (lista[j].fitness > lista[j+1].fitness)	 //condicion
+		{
+			temp = lista[j];	 //temp guarda momentaneamente el valor de lista[j]
+			lista[j]=lista[j+1];  //Asigno al la posicion lista[j], lo que hay en lista[j+1]
+			lista[j+1]=temp;	//obtendra un nuevo valor por parte de temp.
+		}
+	}
 
-        for (int h = ini; h <= fin; h++)
-        {
-                Aaux[h].fitness = temp[h].fitness;
-                Aaux[h].config = temp[h].config;
-        }
 }
-void mergesort(int ini, int fin,Gen *Aaux){
-        int mid;
 
-        if(ini < fin)
-        {
-                mid = (ini + fin) / 2;
-                mergesort(ini, mid,Aaux);
-                mergesort(mid + 1, fin,Aaux);
-                intercambia(ini, mid, fin,Aaux);
-        }
 }
 
 
@@ -81,6 +38,7 @@ int * InitConf(int N){
 	int pos;
 	int i;
 	
+	srand(time(NULL)); 
 
 	for(i = 0; i<N ; i++){
 		conf[i] = -1;
@@ -97,6 +55,57 @@ int * InitConf(int N){
 
 	return conf;
 }
+
+
+
+
+
+void shuffle(Gen * population, int N){
+	int i, j;
+	Gen temp;
+	int c = 0; //contador de cambios;
+	int nc = rand() % ((N+1)/2); //numero de cambios 
+	while(c <= nc){
+		srand (time(NULL));
+		i = rand() % (N+1);
+		j = rand() % (N+1);
+		if ( j != i){
+			temp = population[i];
+			population[i] = population[j];
+			population[j]=temp;
+			c++;
+		}
+	}
+}
+
+void Crossover(Gen * parents,Gen * population,int N){
+	for(int i=0; i<N ; i=i+2){
+		
+	}	
+}
+
+
+void selectChampionship(Gen * parents, Gen * population, int N){
+	int c = 0; // contador de cambios
+	int nc = (N/2); //numero de cambios
+	int i,j;
+	while( c <= nc){
+		srand (time(NULL));
+		i = rand() % (N+1);
+		j = rand() % (N+1);
+		if( i != j){
+			shuffle(population,N);
+			if(population[i].fitness <= population[j].fitness){
+				parents[c] = population[i];
+			}else{
+				parents[c] = population[j];
+			}
+			c++;
+		}
+	}
+}
+
+
 
 
 void printConf(int * conf, int N){
@@ -141,43 +150,53 @@ int  calFit(int * conf, int N){
 
 
 int main(){
-	srand(time(NULL)); 
 	int N;
-	int p; // size of population
-
+	int p,np; // size of population and size of parents
+	Gen Best;
 	printf("Agoritmo genetico para N reinias \n");
-
-	// reinas
-	N = 8;
+	int numMaxGen=15; // Numero Maximo de Generaciones
+	int countGen = 0; //Contador de Generaciones
 	
+	// reinas
+	N = 8;	
 	p = 100;
+	np = p/2;
 	size = p;
 	printf("Numero de Reinas -> %d\n",N);
 	printf("Poblacion inicial -> %d\n",p);
 	
 
 	Gen * population = (Gen *)malloc(sizeof(Gen)*p);
+	Gen * parents = (Gen *)malloc(sizeof(Gen)*np);
 
 	for (int i = 0; i < p; i++){
 		population[i].config = (int *) malloc(sizeof(int)*N);
 		population[i].config = InitConf(N);
 	        population[i].fitness = calFit(population[i].config,N);
 	}
-	
-	printf("Original\n");
 
-	printConf(population[0].config,N);
-	printf("Errores ->> %d\n", population[0].fitness);
-    
-	mergesort(0,p,population);
+	Best = population[0];
 
-	printConf(population[0].config,N);
+	while((Best.fitness) != 0  && (countGen <= numMaxGen) ){
+		ordena(population,p);
+		if (Best.fitness > population[0].fitness){
+			Best = population[0] ;
+		}
 
-	for (int i=0; i<p; i++){
+		selectChampionship(parents,population,N);
 
-		printf("Errores ->> %d\n", population[i].fitness);
+
+		countGen++;
 	}
+
+
+	printf("\n\n=============================================\n");
+	printf("La mejor solucion tiene un fit de %d \n",Best.fitness);
+	printConf(Best.config,N);
+	printf("\n===============================================\n");
     
+	
+
 
 	return 0;
 }
