@@ -78,18 +78,120 @@ void shuffle(Gen * population, int N){
 	}
 }
 
-void Crossover(Gen * parents,Gen * population,int N){
-	for(int i=0; i<N ; i=i+2){
+
+
+//Partially Mapped Crossover
+void Crossover(Gen * parents,Gen * population,int N,int nc){
+		//hijos
+		int * c1 =(int*)malloc(sizeof(int)*N); 
+		int * c2 =(int*)malloc(sizeof(int)*N); 
+		//padres
+		int * p1, * p2;
+		int flag1;
+		int flag2;
+		int pos1,pos2;
+		int k = N/3;
+
+	for(int n=0; n<(nc-1) ; n=n+2){
+
+
+		for(int m = 0; m<N;m++){
+			c1[m] = -1;
+			c2[m] = -1;
+		}
+		flag1 = 0;
+		flag2 = 0;
+
+		p1 = parents[n].config;
+		p2 = parents[n+1].config;
+
+
+		for(int a=k; a<(N-k);a++){
+			c1[a]=p2[a];
+			c2[a]=p1[a];
+		}
+		for(int a=0;a<k;a++){
+			pos1 = p1[a];
+			pos2 = p2[a];
+			for(int b = k; b<(N-k);b++){
+				if(pos1	== c1[b]){
+					flag1 = 1;
+				}
+				if(pos2 == c2[b]){
+					flag2 = 1;
+				}
+			}
+			if(!flag1){
+				c1[a] = pos1;
+			}
+			if(!flag2){
+				c2[a] = pos2;
+			}
+		}
 		
-	}	
+		for(int a=(N-k);a<N;a++){
+			pos1 = p1[a];
+			pos2 = p2[a];
+			for(int b = (N-k); b<N-k;b++){
+				if(pos1	== c1[b]){
+					flag1 = 1;
+				}
+				if(pos2 == c2[b]){
+					flag2 = 1;
+				}
+			}
+			if(!flag1){
+				c1[a] = pos1;
+			}
+			if(!flag2){
+				c2[a] = pos2;
+			}
+		}
+		int count,co;
+		for(int a = 0; a<N;a++){
+			flag1 = 0;
+			count = 0;
+			co = 0;
+			while((!flag1) && count<N){
+				if(a == c1[count]){
+					flag1 = 1;
+				}
+				count++;
+			}
+			
+			if(!flag1){
+				while((c1[co] != -1) && (co<N)){
+					co ++;
+				}
+				c1[co] = a;
+			}
+			flag1 = 0;
+			count = 0;
+			co = 0;
+			while((!flag1) && count<N){
+				if(a == c2[count]){
+					flag1 = 1;
+				} 
+				count++;
+			}
+			
+			if(!flag1){
+				while((c2[co] != -1) && (co < N) ){
+					co ++;
+				}
+				c1[co] = a;
+			}
+		}
+		population[n].config = p1;
+        population[n+1].config =p2;
+	}
 }
 
 
-void selectChampionship(Gen * parents, Gen * population, int N){
+void selectChampionship(Gen * parents, Gen * population, int N,int np){
 	int c = 0; // contador de cambios
-	int nc = (N/2); //numero de cambios
 	int i,j;
-	while( c <= nc){
+	while( c < np){
 		srand (time(NULL));
 		i = rand() % (N+1);
 		j = rand() % (N+1);
@@ -154,7 +256,7 @@ int main(){
 	int p,np; // size of population and size of parents
 	Gen Best;
 	printf("Agoritmo genetico para N reinias \n");
-	int numMaxGen=15; // Numero Maximo de Generaciones
+	int numMaxGen=100|0; // Numero Maximo de Generaciones
 	int countGen = 0; //Contador de Generaciones
 	
 	// reinas
@@ -178,13 +280,23 @@ int main(){
 	Best = population[0];
 
 	while((Best.fitness) != 0  && (countGen <= numMaxGen) ){
+		
+	for (int i = 0; i < p; i++){
+	        population[i].fitness = calFit(population[i].config,N);
+	}
 		ordena(population,p);
-		if (Best.fitness > population[0].fitness){
+		if (Best.fitness >= population[0].fitness){
 			Best = population[0] ;
 		}
 
-		selectChampionship(parents,population,N);
+		selectChampionship(parents,population,N,np);
 
+		Crossover(parents,population,N,np);
+		
+		
+		for(int i = np;i<p;i++){
+			population[i].config = parents[i-np].config;
+		}
 
 		countGen++;
 	}
