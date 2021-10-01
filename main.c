@@ -8,22 +8,19 @@ struct Chromosome{
 };typedef struct Chromosome Chromo;
 
 
-void ordena(Chromo * lista,int np){
-Chromo temp;
-int i,j;
-for (i=1;i<np;i++)
-{
-	for (j=0;j<np-1;j++)
-	{
-		if (lista[j].fitness > lista[j+1].fitness)	 //condicion
-		{
-			temp = lista[j];
-			lista[j]=lista[j+1];
-			lista[j+1]=temp;
-		}
-	}
+void Insertion_sort(Chromo* population, int np){
 
-}
+    int i, j;
+    Chromo temp;
+
+    for (i = 1; i < np; i++) {
+        temp = population[i];
+        for (j = i; j > 0 && population[j - 1].fitness > temp.fitness; j--) {
+            population[j] = population[j - 1];
+        }
+        population[j] = temp;
+    }
+
 
 }
 
@@ -222,10 +219,11 @@ void printConf(int * conf, int N){
 }
 
 void  calFit(Chromo * population, int N,int np){
-	int errores = 0;
+	int errores;
 	int pos;
     int k,i;
     for(k = 0; k< np; k++){
+        errores = 0;
         for(i =0;i<N;i++){
             pos = i-population[k].config[i];
             for(int j = 0; j<N; j++){
@@ -245,11 +243,14 @@ void  calFit(Chromo * population, int N,int np){
                 }
             }
         }
+
+        population[k].fitness = errores;
+
     }
 }
 
 
-Chromo * mutation(Chromo * population, int prob, int N, int np){
+void mutation(Chromo * population, int prob, int N, int np){
 	int aux, i, p1 = 0, p2 = 0;
 	for(i = 0; i<np; i++){
 		srand (time(NULL));
@@ -264,7 +265,7 @@ Chromo * mutation(Chromo * population, int prob, int N, int np){
 
 		}
 	}
-	return population;
+
 }
 
 int main(){
@@ -295,15 +296,28 @@ int main(){
     InitConf(population,N,p);
 
 
-	Best = population[0];
 
-	while((Best.fitness) != 0  && (countGen <= numMaxGen) ){
+	Best = population[0];
+    Best.fitness = 2*N;
+    do{
 
         calFit(population,N,np);
 
-		ordena(population,p);
-		if (Best.fitness >= population[0].fitness){
-			Best = population[0] ;
+        printf("====== Antes de ordenar ======\n");
+        for(int i = 0;i<p;i++){
+			printf("****Hay %d errores\n", population[i].fitness);
+		}
+
+		Insertion_sort(population,p);
+
+        printf("====== Despues de ordenar ======\n");
+        for(int i = 0;i<p;i++){
+			printf("****Hay %d errores\n", population[i].fitness);
+		}
+
+
+		if (population[0].fitness <= Best.fitness  ){
+			Best = population[0];
 		}
 
 		selectChampionship(parents,population,N,np);
@@ -318,13 +332,28 @@ int main(){
 		mutation(population,prob, N, np);
 		countGen++;
 
+        printf("\n\n=============================================\n");
+        printf("La mejor solucion tiene un fit de %d \n",Best.fitness);
+        printf("La mejor solucion es: [ ");
+        for(int i = 0; i<N;i++){
+            printf(" %d ", Best.config[i]);
+        }
+        printf("]\n");
+        printConf(Best.config,N);
+        printf("\n===============================================\n");
 
+        exit(-1);
 
-	}
+	}while((Best.fitness) != 0  && (countGen <= numMaxGen) ) ;
 
 
 	printf("\n\n=============================================\n");
 	printf("La mejor solucion tiene un fit de %d \n",Best.fitness);
+    printf("La mejor solucion es: [ ");
+    for(int i = 0; i<N;i++){
+        printf(" %d ", Best.config[i]);
+    }
+    printf("]\n");
 	printConf(Best.config,N);
 	printf("\n===============================================\n");
 
