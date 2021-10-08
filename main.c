@@ -333,21 +333,24 @@ void mutation(Chromo *population, int prob, int N, int p)
 int main()
 {
 	srand(time(NULL));
+	
 	int i;
 	int N;
 	int p, np, prob; // size of population and size of parents
 
-	N = 8;			   // reinas
-	p = 50;			   //poplacion incial
+	N = 20;			   // reinas
+	p = 100;			   //poplacion incial
 	np = p / 2;		   // numero de padres
-	prob = 30;		   //probabilidad de mutacion
-	int numMaxGen = 250; // Numero Maximo de Generaciones
+	prob = 10;		   //probabilidad de mutacion
+	int numMaxGen = 10000; // Numero Maximo de Generaciones
 	int countGen = 0;  //Contador de Generaciones
 
 	Chromo Best;
 	Best.config = (int *)malloc(sizeof(int) * N);
 	Chromo *population = (Chromo *)malloc(sizeof(Chromo) * p);
 	Chromo *parents = (Chromo *)malloc(sizeof(Chromo) * np);
+
+	clock_t start = clock();
 
 	for (i = 0; i < p; i++)
 	{
@@ -439,6 +442,9 @@ int main()
 	printf("]\n");
 	printConf(Best.config, N);
 	printf("\n===============================================\n");
+
+
+	printf("Tiempo transcurrido: %2.10f\n", ((double)clock() - start) / CLOCKS_PER_SEC);
 
 	return 0;
 }
