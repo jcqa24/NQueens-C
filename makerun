@@ -1,3 +1,7 @@
 clear
-gcc main.c -o main -Werror -Wall
-./main
+gcc -Werror -Wall main.c  -o main.out
+if [ $? -eq 0 ]
+then
+    clear
+    ./main.out
+fi
