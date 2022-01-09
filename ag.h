@@ -11,7 +11,6 @@ int algoritmoGenetico(int N, int p, int np, Chromo *Best, int prob, int numMaxGe
 
     int Bestfitness = 100000;
 
-    // printf("Incio: %d Fin: %d\n",inicio,fin);
 
     // Generamos la poblacion incial
     InitConf(population, N, inicio, fin); // check
